@@ -99,8 +99,8 @@ export default function Dashboard() {
                   <div className="stack" style={{ gap: 8 }}>
                     <AttentionRow to="/alerts" icon={<AlertTriangle size={16} />} label={t('dash.lowStock')} value={fmt.num(d.alerts.low)} tone={d.alerts.low > 0 ? 'warn' : ''} />
                     <AttentionRow to="/alerts" icon={<CalendarClock size={16} />} label={t('dash.expiring')} value={fmt.num(d.alerts.expiring)} tone={d.alerts.expiring > 0 ? 'warn' : ''} />
-                    <AttentionRow to="/reports/debts" icon={<HandCoins size={16} />} label={t('dash.receivables')} value={fmt.money(d.receivables.balance)} sub={d.receivables.overdue > 0 ? t('dash.overdue', { v: fmt.money(d.receivables.overdue) }) : undefined} tone={d.receivables.overdue > 0 ? 'bad' : ''} />
-                    <AttentionRow to="/suppliers" icon={<Truck size={16} />} label={t('dash.payables')} value={fmt.money(d.payables.balance)} sub={d.payables.overdue > 0 ? t('dash.overdue', { v: fmt.money(d.payables.overdue) }) : undefined} tone={d.payables.overdue > 0 ? 'warn' : ''} />
+                    <AttentionRow to="/reports/debts" icon={<HandCoins size={16} />} label={t('dash.receivables')} value={`${fmt.compact(d.receivables.balance)} ${t('common.currency')}`} sub={d.receivables.overdue > 0 ? t('dash.overdue', { v: fmt.money(d.receivables.overdue) }) : undefined} tone={d.receivables.overdue > 0 ? 'bad' : ''} />
+                    <AttentionRow to="/suppliers" icon={<Truck size={16} />} label={t('dash.payables')} value={`${fmt.compact(d.payables.balance)} ${t('common.currency')}`} sub={d.payables.overdue > 0 ? t('dash.overdue', { v: fmt.money(d.payables.overdue) }) : undefined} tone={d.payables.overdue > 0 ? 'warn' : ''} />
                   </div>
                 </div>
               </Panel>
@@ -135,7 +135,7 @@ function AttentionRow({ to, icon, label, value, sub, tone }: { to: string; icon:
         <span style={{ fontWeight: 550 }}>{label}</span>
         {sub && <span className="cell-sub" style={{ display: 'block' }}>{sub}</span>}
       </span>
-      <b className="num">{value}</b>
+      <b className="num nowrap">{value}</b>
       <ArrowRight size={14} className="muted" />
     </Link>
   );

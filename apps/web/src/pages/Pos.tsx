@@ -722,6 +722,20 @@ function PayModal({
 
   const only = (m: PaymentMethod) => setAmounts({ [m]: String(total) });
 
+  // Enter completes the sale from anywhere in the dialog (scanner-and-keyboard workflow).
+  const goRef = useRef(go);
+  goRef.current = go;
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' && !(e.target instanceof HTMLButtonElement) && !(e.target instanceof HTMLSelectElement)) {
+        e.preventDefault();
+        goRef.current();
+      }
+    };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, []);
+
   return (
     <Modal
       wide
@@ -739,13 +753,7 @@ function PayModal({
         </>
       }
     >
-      <form
-        className="stack-lg"
-        onSubmit={(e) => {
-          e.preventDefault();
-          go();
-        }}
-      >
+      <div className="stack-lg">
         <div className="row" style={{ alignItems: 'baseline' }}>
           <span className="muted grow">{t('pos.toPay')}</span>
           <span className="hero-figure num" style={{ fontSize: 40 }}>
@@ -775,6 +783,7 @@ function PayModal({
                 placeholder="0"
                 onChange={(e) => setAmounts({ ...amounts, [m]: e.target.value.replace(/[^\d]/g, '') })}
                 autoFocus={m === 'cash'}
+                data-autofocus={m === 'cash' ? true : undefined}
                 data-testid={`pay-${m}`}
               />
             </Field>
@@ -821,8 +830,7 @@ function PayModal({
           </div>
         )}
         {nonCash > total && <div className="callout bad">{t('err.overpay')}</div>}
-        <button type="submit" hidden />
-      </form>
+      </div>
     </Modal>
   );
 }
@@ -852,7 +860,7 @@ function SaleDone({ sale, onClose }: { sale: Out<'sales.get'>; onClose: () => vo
             <Share2 size={15} />
             {t('receipt.share')}
           </button>
-          <button className="btn primary" onClick={onClose} data-testid="new-sale">
+          <button className="btn primary" onClick={onClose} data-testid="new-sale" data-autofocus>
             {t('pos.newSale')} <kbd style={{ color: 'inherit' }}>Enter</kbd>
           </button>
         </>

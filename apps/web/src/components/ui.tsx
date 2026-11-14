@@ -42,7 +42,7 @@ function useFocusTrap(ref: React.RefObject<HTMLElement | null>) {
   useEffect(() => {
     const prev = document.activeElement as HTMLElement | null;
     const el = ref.current;
-    const first = el?.querySelector<HTMLElement>('[autofocus], input, select, textarea, button:not([data-close])');
+    const first = el?.querySelector<HTMLElement>('[data-autofocus]') ?? el?.querySelector<HTMLElement>('input:not([type=hidden]), select, textarea, button:not([data-close])');
     (first ?? el)?.focus();
     return () => prev?.focus?.();
   }, [ref]);

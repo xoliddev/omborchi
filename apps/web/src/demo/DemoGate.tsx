@@ -66,7 +66,7 @@ function DemoBoot({ children }: { children: ReactNode }) {
             <>
               <div>
                 <p style={{ fontWeight: 560 }}>{progress ? t(`demo.step.${progress.label}` as never) : t('demo.starting')}</p>
-                <p className="muted small">{t('demo.firstVisit')}</p>
+                {progress && <p className="muted small">{t('demo.firstVisit')}</p>}
               </div>
               <div className="progress" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
                 <div style={{ width: `${pct}%` }} />

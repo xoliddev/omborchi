@@ -96,7 +96,7 @@ export function TimeChart({ days, series, height = 240, valueFormat }: { days: s
             </g>
           ))}
           {days.map((d, i) =>
-            i % labelEvery === 0 || i === last ? (
+            (i % labelEvery === 0 && last - i >= labelEvery * 0.6) || i === last ? (
               <text key={d} x={x(i)} y={height - 6} textAnchor={i === 0 ? 'start' : i === last ? 'end' : 'middle'} fontSize={11} fill="var(--muted)">
                 {fmt.shortDate(d)}
               </text>

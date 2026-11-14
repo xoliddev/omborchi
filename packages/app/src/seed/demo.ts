@@ -189,7 +189,7 @@ export async function seedDemo(db: Db, opts: SeedOptions = {}): Promise<SeedResu
     const pid = rng.uuid();
     const unit = units.get(t.unit)!;
     const rank = (idx * 7919) % CATALOG.length; // deterministic shuffle for Zipf-like spread
-    const baseWeight = t.pop * (0.35 + 1.6 / Math.sqrt(1 + rank / 6));
+    const baseWeight = t.pop * (0.025 + 3 / (1 + rank / 4) ** 1.15);
     productRows.push([pid, orgId, catIds.get(t.cat.join('/')), t.name, unit.id, !!t.shelf, 0, at(startDay, -24 * 5)]);
     for (const [code, factor] of t.alt ?? []) unitRows.push([rng.uuid(), pid, units.get(code)!.id, factor, null]);
     const names = t.variants ?? [''];

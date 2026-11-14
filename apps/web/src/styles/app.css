@@ -963,6 +963,8 @@ table.data tfoot td {
   border-bottom: 1px solid var(--line);
   margin-bottom: 16px;
   overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
 }
 .tabs button,
 .tabs a {
