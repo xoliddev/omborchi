@@ -1,0 +1,48 @@
+{
+  "name": "omborchi",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Inventory & sales SaaS for small and medium businesses in Uzbekistan",
+  "license": "MIT",
+  "author": "xoliddev",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "npm run dev -w @omborchi/web",
+    "dev:demo": "npm run dev:demo -w @omborchi/web",
+    "dev:api": "npm run dev -w @omborchi/api",
+    "build": "npm run build -w @omborchi/web && npm run build -w @omborchi/api",
+    "build:demo": "npm run build:demo -w @omborchi/web",
+    "lint": "eslint .",
+    "typecheck": "tsc -p packages/core --noEmit && tsc -p packages/db --noEmit && tsc -p packages/app --noEmit && tsc -p apps/api --noEmit && tsc -p apps/web --noEmit",
+    "test": "vitest run --project core --project app",
+    "test:api": "vitest run --project api",
+    "test:all": "vitest run",
+    "test:e2e": "playwright test",
+    "seed": "npm run seed -w @omborchi/api",
+    "migrate": "npm run migrate -w @omborchi/api"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.65.0",
+    "@types/node": "^26.6.6",
+    "@types/pg": "^8.23.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.14.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "fast-check": "^4.10.2",
+    "globals": "^17.14.0",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.2",
+    "vitest": "^5.1.0"
+  }
+}
