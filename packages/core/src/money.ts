@@ -64,7 +64,7 @@ export function formatNumber(value: number, locale: Locale = 'uz', maxFractionDi
     minimumFractionDigits: 0,
   }).format(value);
   // Normalise narrow no-break spaces to regular no-break spaces (thermal printers choke on U+202F).
-  return formatted.replace(/ /g, ' ');
+  return formatted.replace(/\u202f/g, '\u00a0');
 }
 
 /** "125 000 so'm" / "125 000 сум" / "125,000 UZS" */

@@ -59,7 +59,10 @@ export default function Pos() {
     let grew = true;
     while (grew) {
       grew = false;
-      for (const c of categories.data) if (c.parent_id && ids.has(c.parent_id) && !ids.has(c.id)) (ids.add(c.id), (grew = true));
+      for (const c of categories.data) if (c.parent_id && ids.has(c.parent_id) && !ids.has(c.id)) {
+          ids.add(c.id);
+          grew = true;
+        }
     }
     return ids;
   }, [catId, categories.data]);

@@ -77,7 +77,7 @@ export default function Products() {
             <option value="">{t('products.allCategories')}</option>
             {options.map((o) => (
               <option key={o.id} value={o.id}>
-                {' '.repeat(o.depth)}
+                {'\u2002'.repeat(o.depth)}
                 {o.label.split(' / ').pop()}
               </option>
             ))}

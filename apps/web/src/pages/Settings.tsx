@@ -267,7 +267,7 @@ function Warehouses() {
               <tr>
                 <th>{t('common.name')}</th>
                 <th>{t('settings.kind')}</th>
-                <th className="right">{t('dash.skus', { n: '' }).trim()}</th>
+                <th className="right">{t('products.inStock')}</th>
                 <th className="right">{t('dash.stockValue')}</th>
               </tr>
             </thead>

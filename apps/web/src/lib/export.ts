@@ -26,7 +26,7 @@ function csvCell(v: Cell): string {
 export function exportCsv<T>(name: string, rows: T[], cols: Column<T>[]) {
   const lines = [cols.map((c) => csvCell(c.header)).join(','), ...rows.map((r) => cols.map((c) => csvCell(c.value(r))).join(','))];
   // BOM so Excel opens UTF-8 (Cyrillic, o‘ g‘) correctly.
-  download(new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' }), `${name}.csv`);
+  download(new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' }), `${name}.csv`);
 }
 
 export async function exportXlsx<T>(name: string, rows: T[], cols: Column<T>[]) {
@@ -106,7 +106,7 @@ export function parseCsv(text: string): string[][] {
     row.push(cell);
     rows.push(row);
   }
-  return rows.map((r) => r.map((c) => c.replace(/^﻿/, '')));
+  return rows.map((r) => r.map((c) => c.replace(/^\ufeff/, '')));
 }
 
 export const IMPORT_TEMPLATE = [
@@ -116,5 +116,5 @@ export const IMPORT_TEMPLATE = [
 ];
 
 export function downloadTemplate() {
-  download(new Blob(['﻿' + IMPORT_TEMPLATE.map((r) => r.map(csvCell).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8' }), 'omborchi-import-template.csv');
+  download(new Blob(['\ufeff' + IMPORT_TEMPLATE.map((r) => r.map(csvCell).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8' }), 'omborchi-import-template.csv');
 }
