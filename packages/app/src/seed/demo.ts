@@ -211,7 +211,7 @@ export async function seedDemo(db: Db, opts: SeedOptions = {}): Promise<SeedResu
         tracked: !!t.shelf,
         allowFraction: unit.allow_fraction,
         scarce: false,
-        avgQty: t.unit === 'kg' ? 1.3 : t.unit === 'm' ? 8 : 1.25,
+        avgQty: t.unit === 'kg' ? 1.3 : t.unit === 'm' ? 13 : 1.5,
       });
       seq++;
     });
@@ -228,7 +228,7 @@ export async function seedDemo(db: Db, opts: SeedOptions = {}): Promise<SeedResu
 
   // min stock per store = ~2.5 days of demand at the busier store
   for (const v of variants) {
-    const min = v.weight === 0 ? 0 : Math.max(2, Math.ceil(demand(v, stores[0]) * 2.5));
+    const min = v.weight === 0 ? 0 : Math.max(1, Math.ceil(demand(v, stores[0]) * 1.5));
     const row = productRows.find((p) => p[0] === v.productId)!;
     row[6] = Math.max(Number(row[6]), min);
   }
@@ -373,7 +373,7 @@ export async function seedDemo(db: Db, opts: SeedOptions = {}): Promise<SeedResu
       at(day0, 8),
       s,
       cen,
-      vs.map((v) => ({ v, qty: roundOrder(v, v.weight === 0 ? rng.int(6, 30) : storeDemand(v) * 30 + 4), cost: v.cost })),
+      vs.map((v) => ({ v, qty: roundOrder(v, v.weight === 0 ? rng.int(6, 30) : storeDemand(v) * 40 + 4), cost: v.cost })),
       null,
       rng.chance(0.5) ? 1 : 0.6,
     );
@@ -384,8 +384,8 @@ export async function seedDemo(db: Db, opts: SeedOptions = {}): Promise<SeedResu
       for (const v of variants) {
         const d = demand(v, st);
         const have = ledger.get(st.id, v.id).qty;
-        const target = v.weight === 0 ? 3 : Math.max(3, d * days2);
-        if (have > Math.max(1, d * days1) && !(v.weight === 0 && have === 0)) continue;
+        const target = v.weight === 0 ? 3 : Math.max(5, d * days2);
+        if (have > Math.max(2, d * days1) && !(v.weight === 0 && have === 0)) continue;
         const avail = ledger.get(cen, v.id).qty;
         let q = Math.min(avail, target - have);
         q = v.allowFraction ? roundQty(Math.floor(q * 10) / 10) : Math.floor(q);
@@ -394,7 +394,7 @@ export async function seedDemo(db: Db, opts: SeedOptions = {}): Promise<SeedResu
       transfer(when, cen, st.id, lines);
     }
   };
-  replenish(at(day0, 9), 0, 9);
+  replenish(at(day0, 9), 0, 12);
 
   // ── Daily trading ──
   const pendingPos: { dueDay: string; po: (typeof docs.pos)[number] }[] = [];
@@ -464,7 +464,7 @@ export async function seedDemo(db: Db, opts: SeedOptions = {}): Promise<SeedResu
       po.status = po.lines.every((l) => l.received >= l.qty) ? 'received' : 'partial';
     }
     // 08:30 shop replenishment every second day
-    if (d > 0 && d % 2 === 0 && !(isToday && now.getTime() < at(day, 8.5).getTime())) replenish(at(day, 8.5), 3.5, 8);
+    if (d > 0 && d % 2 === 0 && !(isToday && now.getTime() < at(day, 8.5).getTime())) replenish(at(day, 8.5), 4.5, 11);
 
     // 08:45 weekly write-offs: expired batches + breakage
     if (d % 7 === 3 && at(day, 8.75).getTime() < limit) {
@@ -705,10 +705,10 @@ export async function seedDemo(db: Db, opts: SeedOptions = {}): Promise<SeedResu
         const lines = vs
           .filter((v) => v.weight > 0)
           .map((v) => {
-            const need = storeDemand(v) * 24 - ledger.get(cen, v.id).qty - (pipeline.get(v.id) ?? 0);
+            const need = storeDemand(v) * 30 - ledger.get(cen, v.id).qty - (pipeline.get(v.id) ?? 0);
             return { v, qty: roundOrder(v, need) };
           })
-          .filter((l) => l.qty > 0 && storeDemand(l.v) * 24 - ledger.get(cen, l.v.id).qty > storeDemand(l.v) * 8);
+          .filter((l) => l.qty > 0 && storeDemand(l.v) * 30 - ledger.get(cen, l.v.id).qty > storeDemand(l.v) * 10);
         if (!lines.length) continue;
         for (const l of lines) {
           if (rng.chance(0.25)) {

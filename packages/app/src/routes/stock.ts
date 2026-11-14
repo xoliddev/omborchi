@@ -482,7 +482,7 @@ export const stockRoutes = {
     method: 'GET',
     path: '/alerts',
     permission: 'stock.view',
-    input: z.object({ warehouseId: optId, expiryDays: z.coerce.number().int().min(1).max(365).default(30) }),
+    input: z.object({ warehouseId: optId, expiryDays: z.coerce.number().int().min(1).max(365).default(7) }),
     handler: async (ctx, i) => {
       const wh = warehouseScope(ctx, i.warehouseId);
       const today = ctx.now().toISOString().slice(0, 10);

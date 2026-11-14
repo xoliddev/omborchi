@@ -113,7 +113,7 @@ export const reportRoutes = {
               WHERE v.org_id = $1 AND w.org_id = $1 AND w.kind = 'store' AND w.is_active AND v.is_active AND p.is_active AND p.min_stock > 0
                 AND coalesce(sb.qty, 0) <= p.min_stock AND ($2::uuid[] IS NULL OR w.id = ANY($2::uuid[]))) AS low,
              (SELECT count(*)::int FROM batch_balances bb JOIN batches b ON b.id = bb.batch_id
-              WHERE b.org_id = $1 AND bb.qty > 0 AND b.expires_at <= $3::date + 30 AND ($2::uuid[] IS NULL OR bb.warehouse_id = ANY($2::uuid[]))) AS expiring`,
+              WHERE b.org_id = $1 AND bb.qty > 0 AND b.expires_at <= $3::date + 7 AND ($2::uuid[] IS NULL OR bb.warehouse_id = ANY($2::uuid[]))) AS expiring`,
           [ctx.actor.orgId, wh, today],
         ),
         many<{ warehouse_id: string; name: string; revenue: number; count: number }>(
