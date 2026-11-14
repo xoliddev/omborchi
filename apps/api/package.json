@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/main.ts",
-    "start": "node dist/server.js",
-    "build": "esbuild src/main.ts --bundle --platform=node --format=esm --target=node22 --outfile=dist/server.js --packages=external --alias:@omborchi/core=../../packages/core/src/index.ts --alias:@omborchi/db=../../packages/db/src/index.ts --alias:@omborchi/app=../../packages/app/src/index.ts",
+    "start": "node dist/main.mjs",
+    "build": "esbuild src/main.ts src/cli.ts --bundle --platform=node --format=esm --target=node22 --external:pg-native --banner:js=\"import { createRequire as __cr } from 'node:module'; const require = __cr(import.meta.url);\" --outdir=dist --out-extension:.js=.mjs",
     "migrate": "tsx src/cli.ts migrate",
     "seed": "tsx src/cli.ts seed"
   },

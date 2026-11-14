@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => ({
   optimizeDeps: { exclude: ['@electric-sql/pglite'] },
   worker: { format: 'es' },
   server: { port: 5173, proxy: { '/api': 'http://localhost:3000' } },
-  preview: { port: 4173 },
+  preview: { port: 4178 },
   build: {
     outDir: mode === 'demo' ? 'dist-demo' : 'dist',
     target: 'es2022',

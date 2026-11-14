@@ -12,6 +12,14 @@ import { pgliteParsers, wrapPglite } from '@omborchi/db/pglite';
 declare const self: DedicatedWorkerGlobalScope;
 
 const DATA_DIR = 'idb://omborchi-demo-v1';
+
+// PGlite's IndexedDB filesystem probes for files that do not exist yet when it creates a fresh
+// database and leaves that ENOENT (errno 44) promise unhandled. It is harmless — swallow exactly
+// that case so it does not surface as an uncaught error; report anything else.
+self.addEventListener('unhandledrejection', (e) => {
+  const r = e.reason as { name?: string; errno?: number } | undefined;
+  if (r?.name === 'ErrnoError' && r.errno === 44) e.preventDefault();
+});
 let db: Db | null = null;
 let ready: Promise<InitResult> | null = null;
 
