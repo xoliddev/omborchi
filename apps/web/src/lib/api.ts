@@ -5,7 +5,8 @@
  */
 import { fillPath, routes, type RouteInput, type RouteOutput, type Routes } from '@omborchi/app/client';
 
-export const IS_DEMO = import.meta.env.VITE_DEMO === 'true';
+// `vite --mode demo` builds the GitHub Pages version (no .env file needed, so CI builds it the same way).
+export const IS_DEMO = import.meta.env.MODE === 'demo';
 
 export class ApiError extends Error {
   constructor(

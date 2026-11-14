@@ -3,6 +3,7 @@
  * Everything above this layer is plain SQL, so the same queries run in both places.
  */
 import init from './migrations/0001_init';
+import saleLinePosition from './migrations/0002_sale_line_position';
 
 export interface QueryResult<T> {
   rows: T[];
@@ -24,7 +25,10 @@ export interface Migration {
   sql: string;
 }
 
-export const migrations: Migration[] = [{ id: '0001_init', sql: init }];
+export const migrations: Migration[] = [
+  { id: '0001_init', sql: init },
+  { id: '0002_sale_line_position', sql: saleLinePosition },
+];
 
 /** Apply pending migrations in order, each in its own transaction. Idempotent. */
 export async function migrate(db: Db): Promise<string[]> {

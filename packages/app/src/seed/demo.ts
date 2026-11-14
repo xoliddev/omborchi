@@ -653,6 +653,7 @@ export async function seedDemo(db: Db, opts: SeedOptions = {}): Promise<SeedResu
         docs.saleLines.push({
           id: rng.uuid(),
           sale_id: id,
+          position: idx,
           variant_id: l.v.id,
           unit_code: l.unit,
           unit_factor: l.factor,
@@ -806,7 +807,7 @@ export async function seedDemo(db: Db, opts: SeedOptions = {}): Promise<SeedResu
   progress(0.74, 'saving');
   const saleCols = ['id', 'org_id', 'number', 'warehouse_id', 'shift_id', 'user_id', 'customer_id', 'price_list_id', 'subtotal', 'discount_total', 'total', 'cost_total', 'paid', 'change', 'debt', 'due_date', 'returned_total', 'status', 'created_at'];
   await insertMany(db, 'sales', saleCols, docs.sales.map((s) => saleCols.map((c) => s[c] ?? null)));
-  const lineCols = ['id', 'sale_id', 'variant_id', 'unit_code', 'unit_factor', 'qty', 'base_qty', 'unit_price', 'discount', 'total', 'cost_total', 'returned_qty'];
+  const lineCols = ['id', 'sale_id', 'position', 'variant_id', 'unit_code', 'unit_factor', 'qty', 'base_qty', 'unit_price', 'discount', 'total', 'cost_total', 'returned_qty'];
   await insertMany(db, 'sale_lines', lineCols, docs.saleLines.map((s) => lineCols.map((c) => s[c] ?? null)));
   await insertMany(db, 'sale_payments', ['id', 'sale_id', 'method', 'amount', 'provider_ref', 'created_at'], docs.payments);
   await insertMany(db, 'sale_returns', ['id', 'org_id', 'number', 'sale_id', 'warehouse_id', 'shift_id', 'total', 'cost_total', 'refund_method', 'reason', 'user_id', 'created_at'], docs.returns);

@@ -148,10 +148,10 @@ export async function createSale(ctx: Ctx, input: z.output<typeof saleInput>) {
   await insertMany(
     db,
     'sale_lines',
-    ['sale_id', 'variant_id', 'unit_code', 'unit_factor', 'qty', 'base_qty', 'unit_price', 'discount', 'total', 'cost_total'],
+    ['sale_id', 'position', 'variant_id', 'unit_code', 'unit_factor', 'qty', 'base_qty', 'unit_price', 'discount', 'total', 'cost_total'],
     lines.map((l, idx) => {
       const pl = cart.lines[idx];
-      return [sale.id, l.variantId, l.unit, l.factor, pl.qty, pl.baseQty, pl.unitPrice, roundMoney(pl.lineDiscount + pl.cartDiscountShare), pl.total, costByLine.get(idx) ?? 0];
+      return [sale.id, idx, l.variantId, l.unit, l.factor, pl.qty, pl.baseQty, pl.unitPrice, roundMoney(pl.lineDiscount + pl.cartDiscountShare), pl.total, costByLine.get(idx) ?? 0];
     }),
   );
   const payments = [];
@@ -356,7 +356,7 @@ export const salesRoutes = {
           ctx.db,
           `SELECT l.id, l.variant_id, p.name || CASE WHEN v.name <> '' THEN ' · ' || v.name ELSE '' END AS name, v.sku, v.barcode, l.unit_code, l.unit_factor,
                   l.qty, l.base_qty, l.unit_price, l.discount, l.total, l.cost_total, l.returned_qty
-           FROM sale_lines l JOIN variants v ON v.id = l.variant_id JOIN products p ON p.id = v.product_id WHERE l.sale_id = $1 ORDER BY l.id`,
+           FROM sale_lines l JOIN variants v ON v.id = l.variant_id JOIN products p ON p.id = v.product_id WHERE l.sale_id = $1 ORDER BY l.position, l.id`,
           [id],
         ),
         many<{ method: string; amount: number; provider_ref: string | null }>(ctx.db, 'SELECT method, amount, provider_ref FROM sale_payments WHERE sale_id = $1 ORDER BY method', [id]),
