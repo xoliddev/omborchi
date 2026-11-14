@@ -40,7 +40,8 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
     reply.setCookie(COOKIE, token, { httpOnly: true, sameSite: 'lax', secure: opts.cookieSecure ?? false, path: '/', expires });
 
   app.setErrorHandler((err, req, reply) => {
-    const e = err instanceof AppError ? err : (err as { validation?: unknown }).validation ? new AppError('VALIDATION', err.message) : toAppError(err);
+    const v = err as { validation?: unknown; message?: string };
+    const e = err instanceof AppError ? err : v.validation ? new AppError('VALIDATION', v.message ?? 'Invalid input') : toAppError(err);
     if (e.status >= 500) req.log.error(err);
     void reply.status(e.status).send({ error: { code: e.code, message: e.message, details: e.details } });
   });
