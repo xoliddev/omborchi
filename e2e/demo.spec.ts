@@ -82,8 +82,10 @@ test('stock transfer moves quantity between locations', async ({ page, isMobile 
   await boot(page, 'transfers');
   await page.getByRole('button', { name: 'New transfer' }).click();
   const drawer = page.getByRole('dialog');
-  await drawer.getByPlaceholder('Add product: name, SKU or barcode').fill('Guruch Lazer');
-  await drawer.getByRole('option').first().click();
+  const picker = drawer.getByPlaceholder('Add product: name, SKU or barcode');
+  await picker.fill('Guruch Lazer');
+  await expect(drawer.getByRole('listbox').getByRole('option').first()).toBeVisible();
+  await picker.press('Enter');
   await drawer.getByLabel('Qty').fill('3');
   await drawer.getByRole('button', { name: 'Move stock' }).click();
   await expect(page.getByText(/Transfer TR-\d+ completed/)).toBeVisible();

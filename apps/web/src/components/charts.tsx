@@ -37,7 +37,7 @@ export interface Series {
   area?: boolean;
 }
 
-export function TimeChart({ days, series, height = 240, valueFormat }: { days: string[]; series: Series[]; height?: number; valueFormat?: (v: number) => string }) {
+export function TimeChart({ days, series, height = 240, valueFormat, partialLast }: { days: string[]; series: Series[]; height?: number; valueFormat?: (v: number) => string; partialLast?: boolean }) {
   const { fmt, t } = useI18n();
   const [ref, width] = useWidth<HTMLDivElement>();
   const [hover, setHover] = useState<number | null>(null);
@@ -105,9 +105,18 @@ export function TimeChart({ days, series, height = 240, valueFormat }: { days: s
           {series.map((s) =>
             s.area ? <path key={`a-${s.key}`} d={`${path(s.values)}L${x(last)},${y(0)}L${x(0)},${y(0)}Z`} fill={s.color} opacity={0.1} /> : null,
           )}
-          {series.map((s) => (
-            <path key={s.key} d={path(s.values)} fill="none" stroke={s.color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
-          ))}
+          {series.map((s) => {
+            // The current day is still in progress: draw its segment dashed so the dip does not read as a crash.
+            const solid = partialLast && s.values.length > 1 ? s.values.slice(0, -1) : s.values;
+            return (
+              <g key={s.key}>
+                <path d={path(solid)} fill="none" stroke={s.color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+                {partialLast && s.values.length > 1 && (
+                  <path d={`M${x(last - 1)},${y(s.values[last - 1])}L${x(last)},${y(s.values[last])}`} fill="none" stroke={s.color} strokeWidth={2} strokeDasharray="3 4" strokeLinecap="round" />
+                )}
+              </g>
+            );
+          })}
           {series.map((s) => (
             <circle key={`e-${s.key}`} cx={x(last)} cy={y(s.values[last] ?? 0)} r={4} fill={s.color} stroke="var(--surface)" strokeWidth={2} />
           ))}

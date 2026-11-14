@@ -1,3 +1,4 @@
+import { tashkentDay } from '@omborchi/core';
 import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle, ArrowRight, CalendarClock, HandCoins, Truck } from 'lucide-react';
 import { Link } from 'react-router';
@@ -71,6 +72,7 @@ export default function Dashboard() {
             <div className="grid dash">
               <Panel title={t('dash.revenueProfit')} sub={t('dash.revenueProfitSub')}>
                 <TimeChart
+                  partialLast={(d.series.at(-1)?.day ?? '') === tashkentDay(new Date())}
                   days={d.series.map((s) => s.day)}
                   series={[
                     { key: 'revenue', label: t('dash.revenue'), color: SERIES[0], values: d.series.map((s) => s.revenue), area: true },

@@ -560,12 +560,17 @@ textarea.input {
 }
 .seg {
   display: inline-flex;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
   padding: 2px;
   border-radius: var(--r-sm);
   background: var(--sunken);
   gap: 2px;
 }
 .seg button {
+  flex: none;
+  white-space: nowrap;
   height: 28px;
   padding: 0 10px;
   border: 0;

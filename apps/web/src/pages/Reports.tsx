@@ -1,3 +1,4 @@
+import { tashkentDay } from '@omborchi/core';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { NavLink, useParams } from 'react-router';
@@ -104,6 +105,7 @@ function SalesReport() {
           </div>
           <Panel title={t('dash.revenueProfit')}>
             <TimeChart
+              partialLast={(d.series.at(-1)?.day ?? '') === tashkentDay(new Date())}
               days={d.series.map((x) => x.day)}
               series={[
                 { key: 'r', label: t('dash.revenue'), color: SERIES[0], values: d.series.map((x) => x.revenue), area: true },
