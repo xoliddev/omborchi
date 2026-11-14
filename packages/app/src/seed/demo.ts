@@ -814,13 +814,29 @@ export async function seedDemo(db: Db, opts: SeedOptions = {}): Promise<SeedResu
   await insertMany(db, 'inventory_counts', ['id', 'org_id', 'number', 'warehouse_id', 'category_id', 'status', 'note', 'user_id', 'created_at', 'applied_at'], docs.counts);
   await insertMany(db, 'inventory_count_lines', ['id', 'count_id', 'variant_id', 'expected_qty', 'counted_qty', 'unit_cost'], docs.countLines);
   progress(0.8, 'ledger');
-  // Movements in chronological order; the trigger materialises stock_balances / batch_balances as they land.
-  await insertMany(
-    db,
-    'stock_movements',
-    ['org_id', 'warehouse_id', 'variant_id', 'batch_id', 'kind', 'qty', 'unit_cost', 'cost_value', 'doc_type', 'doc_id', 'user_id', 'note', 'created_at'],
-    movementRows,
-  );
+  // Bulk load: insert the ledger with the per-row trigger paused, then materialise balances from it in
+  // one set-based statement (the same derivation the trigger performs row by row). The drift check in
+  // the tests proves both paths agree.
+  await db.tx(async (tx) => {
+    await tx.exec('ALTER TABLE stock_movements DISABLE TRIGGER stock_movements_apply');
+    await insertMany(
+      tx,
+      'stock_movements',
+      ['org_id', 'warehouse_id', 'variant_id', 'batch_id', 'kind', 'qty', 'unit_cost', 'cost_value', 'doc_type', 'doc_id', 'user_id', 'note', 'created_at'],
+      movementRows,
+    );
+    await tx.query(
+      `INSERT INTO stock_balances (org_id, warehouse_id, variant_id, qty, avg_cost, updated_at)
+       SELECT org_id, warehouse_id, variant_id, sum(qty), 0, max(created_at) FROM stock_movements WHERE org_id = $1 GROUP BY 1, 2, 3`,
+      [orgId],
+    );
+    await tx.query(
+      `INSERT INTO batch_balances (warehouse_id, batch_id, qty)
+       SELECT warehouse_id, batch_id, sum(qty) FROM stock_movements WHERE org_id = $1 AND batch_id IS NOT NULL GROUP BY 1, 2`,
+      [orgId],
+    );
+    await tx.exec('ALTER TABLE stock_movements ENABLE TRIGGER stock_movements_apply');
+  });
   progress(0.93, 'ledger');
   const keys = [...ledger.balances.entries()];
   await db.query(
