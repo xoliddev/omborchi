@@ -69,6 +69,8 @@ export class AttemptLimiter {
   ) {}
   check(key: string): boolean {
     const now = Date.now();
+    // Drop expired windows so a flood of distinct keys cannot grow the map without bound.
+    if (this.hits.size > 10_000) for (const [k, v] of this.hits) if (v.reset < now) this.hits.delete(k);
     const h = this.hits.get(key);
     if (!h || h.reset < now) {
       this.hits.set(key, { count: 1, reset: now + this.windowMs });

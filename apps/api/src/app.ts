@@ -15,6 +15,10 @@ export interface AppOptions {
   webDir?: string | null;
   logger?: boolean;
   allowRegistration?: boolean;
+  /** Trust X-Forwarded-For (only when a reverse proxy sets it); otherwise clients could spoof their IP past the login limiter. */
+  trustProxy?: boolean;
+  /** New organisations one IP may register per hour (default 10). */
+  signupsPerHour?: number;
   now?: () => Date;
 }
 
@@ -32,9 +36,10 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
   const { db } = opts;
   const ttl = opts.sessionTtlDays ?? 30;
   const now = opts.now ?? (() => new Date());
-  const app = Fastify({ logger: opts.logger ?? false, bodyLimit: 8 * 1024 * 1024, trustProxy: true });
+  const app = Fastify({ logger: opts.logger ?? false, bodyLimit: 8 * 1024 * 1024, trustProxy: opts.trustProxy ?? false });
   await app.register(fastifyCookie);
   const limiter = new AttemptLimiter(8, 60_000);
+  const signups = new AttemptLimiter(opts.signupsPerHour ?? 10, 3_600_000);
 
   const setCookie = (reply: FastifyReply, token: string, expires: Date) =>
     reply.setCookie(COOKIE, token, { httpOnly: true, sameSite: 'lax', secure: opts.cookieSecure ?? false, path: '/', expires });
@@ -81,6 +86,7 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
 
   app.post('/api/auth/register', async (req, reply) => {
     if (opts.allowRegistration === false) throw new AppError('FORBIDDEN', 'Registration is disabled');
+    if (!signups.check(req.ip)) throw new AppError('FORBIDDEN', 'Too many sign-ups, try again later', { reason: 'RATE_LIMITED' });
     const input = registerInput.parse(req.body);
     const exists = await db.query('SELECT 1 FROM users WHERE lower(email) = lower($1)', [input.email]);
     if (exists.rows.length) throw new AppError('CONFLICT', 'This email is already registered', { field: 'email' });

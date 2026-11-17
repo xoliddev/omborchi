@@ -10,6 +10,7 @@ const schema = z.object({
   MIGRATE_ON_START: z.enum(['true', 'false']).default('true').transform((v) => v === 'true'),
   ALLOW_REGISTRATION: z.enum(['true', 'false']).default('true').transform((v) => v === 'true'),
   DEMO_PASSWORD: z.string().min(8).default('demo12345'),
+  TRUST_PROXY: z.enum(['true', 'false']).default('false').transform((v) => v === 'true'),
   LOG_LEVEL: z.string().default('info'),
 });
 

@@ -160,6 +160,7 @@ npm run dev:api & npm run dev   # API on :3000, web on :5173 (proxied)
 | `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | `omborchi` / — / `omborchi` | Database credentials for compose |
 | `COOKIE_SECURE` | `false` | Set `true` behind HTTPS |
 | `SESSION_TTL_DAYS` | `30` | Session lifetime |
+| `TRUST_PROXY` | `false` | Set `true` only behind a reverse proxy that sets `X-Forwarded-For` |
 | `ALLOW_REGISTRATION` | `true` | Allow self-service sign-up of new businesses |
 | `MIGRATE_ON_START` | `true` | Apply pending migrations at boot |
 | `DEMO_PASSWORD` | `demo12345` | Password for users created by `seed` |

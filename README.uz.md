@@ -132,6 +132,7 @@ npm run dev:api & npm run dev
 | `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | `omborchi` / — / `omborchi` | compose uchun baza ma’lumotlari |
 | `COOKIE_SECURE` | `false` | HTTPS orqasida `true` qiling |
 | `SESSION_TTL_DAYS` | `30` | Sessiya muddati (kun) |
+| `TRUST_PROXY` | `false` | Faqat `X-Forwarded-For` qo'yadigan reverse proxy orqasida `true` qiling |
 | `ALLOW_REGISTRATION` | `true` | Yangi bizneslarning o‘zi ro‘yxatdan o‘tishiga ruxsat |
 | `MIGRATE_ON_START` | `true` | Ishga tushganda migratsiyalarni qo‘llash |
 | `DEMO_PASSWORD` | `demo12345` | `seed` yaratgan foydalanuvchilar paroli |

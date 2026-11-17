@@ -18,6 +18,7 @@ const app = await buildApp({
   sessionTtlDays: config.SESSION_TTL_DAYS,
   webDir: config.WEB_DIR ?? null,
   allowRegistration: config.ALLOW_REGISTRATION,
+  trustProxy: config.TRUST_PROXY,
   logger: true,
 });
 

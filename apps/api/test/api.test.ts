@@ -12,7 +12,7 @@ let pool: pg.Pool;
 
 beforeAll(async () => {
   ({ db, pool } = await setupDb());
-  app = await buildApp({ db });
+  app = await buildApp({ db, signupsPerHour: 10_000 });
 });
 afterAll(async () => {
   await app.close();
@@ -68,6 +68,38 @@ describe('auth', () => {
     await c.post('/api/auth/logout');
     expect((await c.get('/api/me')).status).toBe(401);
     expect(fresh.cookie).toBe('');
+  });
+
+  it('ignores a spoofed X-Forwarded-For so the login limiter cannot be bypassed', async () => {
+    const { email } = await registerOwner();
+    const codes: number[] = [];
+    for (let n = 0; n < 10; n++) {
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/auth/login',
+        payload: JSON.stringify({ email, password: 'wrong-password' }),
+        headers: { 'content-type': 'application/json', 'x-forwarded-for': `10.0.0.${n}` },
+      });
+      codes.push(res.statusCode);
+    }
+    expect(codes.slice(0, 8).every((c) => c === 401)).toBe(true);
+    expect(codes.slice(8)).toEqual([403, 403]);
+  });
+
+  it('limits how many organisations one IP can register per hour', async () => {
+    const limited = await buildApp({ db, signupsPerHour: 2 });
+    const codes: number[] = [];
+    for (let n = 0; n < 3; n++) {
+      const res = await limited.inject({
+        method: 'POST',
+        url: '/api/auth/register',
+        payload: JSON.stringify({ orgName: `Spam ${uniq()}`, name: 'Ega', email: `spam-${uniq()}@test.uz`, password: 'parol12345' }),
+        headers: { 'content-type': 'application/json' },
+      });
+      codes.push(res.statusCode);
+    }
+    await limited.close();
+    expect(codes).toEqual([200, 200, 403]);
   });
 
   it('refuses non-JSON mutations (CSRF guard)', async () => {
