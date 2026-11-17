@@ -132,8 +132,16 @@ export const adminRoutes = {
       if (membershipId) {
         const m = await one<{ user_id: string; role: string }>(ctx.db, 'SELECT user_id, role FROM memberships WHERE id = $1 AND org_id = $2', [membershipId, org], 'Member');
         if (m.user_id === ctx.actor.userId && (i.role !== 'owner' || !i.isActive)) throw new AppError('INVALID_STATE', 'You cannot demote or deactivate yourself');
-        await ctx.db.query('UPDATE users SET name = $2 WHERE id = $1', [m.user_id, i.name]);
-        if (i.password) await ctx.db.query('UPDATE users SET password_hash = $2 WHERE id = $1', [m.user_id, await ctx.hashPassword(i.password)]);
+        // A login is global: if this person also belongs to another organisation, this owner must not be able to
+        // reset their password (that would take over the other organisation's account) or rename them there.
+        const elsewhere = await many(ctx.db, 'SELECT 1 FROM memberships WHERE user_id = $1 AND org_id <> $2 LIMIT 1', [m.user_id, org]);
+        if (elsewhere.length && i.password) {
+          throw new AppError('FORBIDDEN', 'This person also works in another organisation; only they can change their password', { field: 'password' });
+        }
+        if (!elsewhere.length) {
+          await ctx.db.query('UPDATE users SET name = $2 WHERE id = $1', [m.user_id, i.name]);
+          if (i.password) await ctx.db.query('UPDATE users SET password_hash = $2 WHERE id = $1', [m.user_id, await ctx.hashPassword(i.password)]);
+        }
         await ctx.db.query('UPDATE memberships SET role = $2, all_warehouses = $3, is_active = $4 WHERE id = $1', [membershipId, i.role, i.warehouseIds === null, i.isActive]);
       } else {
         if (!i.password) throw new AppError('VALIDATION', 'Password is required for a new user', { field: 'password' });

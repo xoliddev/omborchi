@@ -139,4 +139,25 @@ describe('business flow over HTTP', () => {
     const audit = (await c.get('/api/audit')).json;
     expect(audit.rows.find((r: { action: string; payload: { password?: string } }) => r.action === 'user.save').payload.password).toBe('***');
   });
+
+  it("an owner cannot reset the password of a person who also belongs to another organisation", async () => {
+    const victim = await registerOwner();
+    const attacker = await registerOwner();
+    const add = await attacker.c.post('/api/users', { name: 'Kassir', email: victim.email, password: 'attacker123', role: 'cashier', warehouseIds: null });
+    expect(add.status).toBe(200);
+    const member = (await attacker.c.get('/api/users')).json.find((u: { email: string }) => u.email === victim.email);
+    const reset = await attacker.c.post('/api/users', {
+      membershipId: member.membership_id,
+      name: 'Hacked',
+      email: victim.email,
+      password: 'attacker123',
+      role: 'cashier',
+      warehouseIds: null,
+    });
+    expect(reset.status).toBe(403);
+    expect((await new Client().post('/api/auth/login', { email: victim.email, password: 'attacker123' })).status).toBe(401);
+    const again = new Client();
+    expect((await again.post('/api/auth/login', { email: victim.email, password: 'parol12345' })).status).toBe(200);
+    expect((await again.get('/api/me')).json.user.name).toBe('Ega');
+  });
 });
